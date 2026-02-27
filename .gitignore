@@ -1,0 +1,8 @@
+node_modules/
+.env
+postgres-data/
+*.log
+check-db.js
+learn.txt
+.DS_Store
+*.json

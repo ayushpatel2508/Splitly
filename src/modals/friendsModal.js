@@ -2,12 +2,12 @@ import pool from "../config/db";
 
 const Friend = {
   async add(userId, friendId) {
-    const client = await pool.pool.connect();
+    const client = await pool.connect();
     try {
       await client.query("BEGIN");
 
       await client.query(
-        "INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)",
+        "INSERT INTO friends (user_one, user_two) VALUES ($1, $2)",
         [userId, friendId]
       );
 
@@ -23,10 +23,10 @@ const Friend = {
 
   async findAll(userId) {
     const result = await pool.query(
-      `SELECT u.id, u.name, u.email 
+      `SELECT u.id, u.username, u.email 
        FROM users u
-       JOIN friends f ON u.id = f.friend_id
-       WHERE f.user_id = $1`,
+       JOIN friends f ON (u.id = f.user_two AND f.user_one = $1) OR (u.id = f.user_one AND f.user_two = $1)
+       WHERE u.id != $1`,
       [userId]
     );
     return result.rows;
@@ -34,7 +34,7 @@ const Friend = {
 
   async areFriends(userId1, userId2) {
     const result = await pool.query(
-      "SELECT id FROM friends WHERE user_id = $1 AND friend_id = $2",
+      "SELECT id FROM friends WHERE (user_one = $1 AND user_two = $2) OR (user_one = $2 AND user_two = $1)",
       [userId1, userId2]
     );
     return result.rows.length > 0;
@@ -42,7 +42,7 @@ const Friend = {
 
   async remove(userId, friendId) {
     const result = await pool.query(
-      "DELETE FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
+      "DELETE FROM friends WHERE (user_one = $1 AND user_two = $2) OR (user_one = $2 AND user_two = $1)",
       [userId, friendId]
     );
     return result.rowCount > 0;

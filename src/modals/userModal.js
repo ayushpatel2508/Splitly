@@ -24,6 +24,14 @@ const User = {
     return result.rows[0];
   },
 
+  async findWithPassword(email) {
+    const result = await pool.query(
+      `SELECT * FROM users WHERE email = $1`,
+      [email]
+    );
+    return result.rows[0];
+  },
+
   async delete(id) {
     const result = await pool.query(
       `DELETE FROM users WHERE id = $1 RETURNING username, email`,
