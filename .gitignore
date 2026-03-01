@@ -5,4 +5,4 @@ postgres-data/
 check-db.js
 learn.txt
 .DS_Store
-*.json
+
